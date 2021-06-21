@@ -37,7 +37,8 @@ SDL_Window* gWindow = NULL;
 SDL_Renderer* gRenderer = NULL;
 
 //Scene textures
-LTexture gFooTexture;
+LTexture gRocketTexture;
+LTexture gPowerTexture;
 LTexture gBackgroundTexture;
 
 bool init()
@@ -99,15 +100,22 @@ bool loadMedia()
 	//Loading success flag
 	bool success = true;
 
-	//Load Foo' texture
-	if (!gFooTexture.loadFromFile("graphic/model.png", gRenderer))
+	//Load Rocket texture
+	if (!gRocketTexture.loadFromFile("graphic/model3.png", gRenderer))
+	{
+		printf("Failed to load Foo' texture image!\n");
+		success = false;
+	}
+
+	//Load Power' texture
+	if (!gPowerTexture.loadFromFile("graphic/power.png", gRenderer))
 	{
 		printf("Failed to load Foo' texture image!\n");
 		success = false;
 	}
 
 	//Load background texture
-	if (!gBackgroundTexture.loadFromFile("graphic/background.png", gRenderer))
+	if (!gBackgroundTexture.loadFromFile("graphic/background2.png", gRenderer))
 	{
 		printf("Failed to load background texture image!\n");
 		success = false;
@@ -119,8 +127,9 @@ bool loadMedia()
 void close()
 {
 	//Free loaded images
-	gFooTexture.free();
+	gRocketTexture.free();
 	gBackgroundTexture.free();
+	gPowerTexture.free();
 
 	//Destroy window	
 	SDL_DestroyRenderer(gRenderer);
@@ -141,9 +150,12 @@ int main(int argc, char* args[])
 	double velocity = 0;
 	double gravity = 0.15;
 
+	double difficultity = 350;
 
 	double rocketX = 50;
 	double rocketXV = 0;
+
+	double scrollingSpeed = 3;
 
 	int yPoint = 100;
 	int xPoint = 0;
@@ -152,6 +164,7 @@ int main(int argc, char* args[])
 	int scrollingOffsetBackground = 0;
 	int scrollingOffsetMap = 0;
 
+	bool power;
 	bool collision = false;
 
 	map downMap;
@@ -184,7 +197,7 @@ int main(int argc, char* args[])
 			//While application is running
 			while (!quit)
 			{
-
+				power = false;
 				//Handle events on queue
 				while (SDL_PollEvent(&e) != 0)
 				{
@@ -196,6 +209,7 @@ int main(int argc, char* args[])
 
 					if (e.key.keysym.sym == SDLK_SPACE)
 					{
+						power = true;
 						velocity -= 0.5;
 						rocketXV += 1;
 					}
@@ -212,9 +226,9 @@ int main(int argc, char* args[])
 				gBackgroundTexture.render(scrollingOffsetBackground, 0, gRenderer);
 				gBackgroundTexture.render(scrollingOffsetBackground + gBackgroundTexture.getWidth(), 0, gRenderer);
 				
-				
-				scrollingOffsetMap -= 2;
-				--scrollingOffsetBackground;
+				scrollingSpeed += 0.002;
+				scrollingOffsetMap = scrollingOffsetMap - scrollingSpeed;
+				--scrollingOffsetBackground + scrollingSpeed;
 				if (scrollingOffsetBackground < -gBackgroundTexture.getWidth())
 				{
 					scrollingOffsetBackground = 0;
@@ -222,25 +236,26 @@ int main(int argc, char* args[])
 
 
 				//Render Foo' to the screen
-				gFooTexture.render(	rocketX, -rocketHeight, gRenderer);
+				gRocketTexture.render(	rocketX, -rocketHeight, gRenderer);
+				if (power) gPowerTexture.render(rocketX-10, -rocketHeight+14, gRenderer);
 
 
+				difficultity -= 0.01;
 
-
-				SDL_SetRenderDrawColor(gRenderer, 255, 0, 0, 255);
-			for (int i = 1; i < downMapValues.size(); i++) {
+				SDL_SetRenderDrawColor(gRenderer, 255, 255, 255, 255);
+				for (int i = 1; i < downMapValues.size(); i++) {
 					SDL_RenderDrawLine(gRenderer, downMapValues[i-1][0]+scrollingOffsetMap, downMapValues[i-1][1], downMapValues[i][0]+scrollingOffsetMap, downMapValues[i][1]);
-					SDL_RenderDrawLine(gRenderer, downMapValues[i-1][0]+scrollingOffsetMap, downMapValues[i-1][1]-400, downMapValues[i][0]+scrollingOffsetMap, downMapValues[i][1]-400);
-					
-					if(downMapValues[i-1][0] + scrollingOffsetMap <= rocketX && downMapValues[i][0] + scrollingOffsetMap > rocketX)
-					collision = downMap.checkColisions(rocketX, rocketHeight, i, scrollingOffsetMap, gFooTexture.getWidth());
+					SDL_RenderDrawLine(gRenderer, downMapValues[i-1][0]+scrollingOffsetMap, downMapValues[i-1][1]-difficultity, downMapValues[i][0]+scrollingOffsetMap, downMapValues[i][1]-difficultity);
+						
+					if(downMapValues[i-1][0] + scrollingOffsetMap <= rocketX+(gRocketTexture.getWidth()/2) && downMapValues[i][0] + scrollingOffsetMap > rocketX+(gRocketTexture.getWidth() / 2))
+					collision = downMap.checkColisions(rocketX, rocketHeight, i, scrollingOffsetMap, gRocketTexture.getWidth(), difficultity);
 				}
 				
 
 				//Update screen
 				SDL_RenderPresent(gRenderer);
 				if (downMap.getTotalLength() + scrollingOffsetMap < 900) {
-					downMap.calculateMap(scrollingOffsetMap);
+					downMap.calculateMap(scrollingOffsetMap, difficultity);
 				}
 
 				rocketHeight = rocketHeight - velocity;

@@ -11,18 +11,18 @@ std::vector<vector<int>> map::getMap()
 	return mapValues;
 }
 
-void map::calculateMap(int offSet)
+void map::calculateMap(int offSet, int difficult)
 {	
 	int rand1, rand2, rand3, x, y;
 	rand1 = rand() % 90+10;
-	rand2 = rand() % 40+10;
+	rand2 = rand() % 90+10;
 	rand3 = rand() % 2;
 	totalLength += rand1;
 	x = mapValues[mapValues.size()-1][0];
 	y = mapValues[mapValues.size()-1][1];
 
 
-	if (actualHeight + rand2 > 600 || rand3 == 0 && rand3 < 500) {
+	if (actualHeight + rand2 > 600 || rand3 == 0 && actualHeight - difficult > 0 ) {
 		rand2 = -rand2;
 	}
 
@@ -33,7 +33,7 @@ void map::calculateMap(int offSet)
 	}
 }
 
-bool map::checkColisions(int rocketX, int rocketY, int index, int scrollingOfSetMap, int rocketWidth) {
+bool map::checkColisions(int rocketX, int rocketY, int index, int scrollingOfSetMap, int rocketWidth, int difficult) {
 	bool coolision = false;
 	double x1, x2, y1, y2, lineLength, lineHeight, myCollisionX, collisionPoint;
 	x1 = mapValues[index - 1][0] + scrollingOfSetMap;
@@ -53,7 +53,7 @@ bool map::checkColisions(int rocketX, int rocketY, int index, int scrollingOfSet
 	{
 		collisionPoint = y1 + (myCollisionX / lineLength) * lineHeight;
 	}
-	if (collisionPoint + rocketY < 20 ) {
+	if (collisionPoint + rocketY < 35 || collisionPoint-difficult + rocketY > 0) {
 		cout << "collisionPoint: " << collisionPoint << endl;
 		cout << "lineLength: " << lineLength << endl;
 		cout << "lineHeigh: " << lineHeight << endl;
@@ -78,6 +78,6 @@ int map::getTotalLength() {
 
 map::map()
 {
-	actualHeight = 500;
-	mapValues.push_back({ 0,500 });
+	actualHeight = 400;
+	mapValues.push_back({ 0,400 });
 }
