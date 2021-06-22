@@ -40,8 +40,6 @@ bool map::checkColisions(int rocketX, int rocketY, int index, int scrollingOfSet
 	y1 = mapValues[index - 1][1];
 	x2 = mapValues[index][0] + scrollingOfSetMap;
 	y2 = mapValues[index][1];
-//	cout << "x1: " << x1 << endl;
-//	cout << "x2: " << x2 << endl;
 	lineLength = x2 - x1;
 	lineHeight = y2 - y1;
 	myCollisionX = rocketX + rocketWidth/2 - x1;
@@ -53,20 +51,8 @@ bool map::checkColisions(int rocketX, int rocketY, int index, int scrollingOfSet
 	{
 		collisionPoint = y1 + (myCollisionX / lineLength) * lineHeight;
 	}
-	if (collisionPoint + rocketY < 35 || collisionPoint-difficult + rocketY > 0) {
-		cout << "collisionPoint: " << collisionPoint << endl;
-		cout << "lineLength: " << lineLength << endl;
-		cout << "lineHeigh: " << lineHeight << endl;
-		cout << "Collision X: " << myCollisionX << endl;
-		cout << "Rocket X: " << rocketX << endl;
-		cout << "x1: " << x1 << endl;
-		cout << "y1: " << y1 << endl;
-		cout << "x2: " << x2 << endl;
-		cout << "y2: " << y2 << endl;
-		cout << "rocketY: " << rocketY << endl;
-		cout << "KOLIZJA!!!!" << endl;
+	if (collisionPoint + rocketY < 35 || collisionPoint-difficult + rocketY > 0)
 		coolision = true;
-	}
 	return coolision;
 }
 
